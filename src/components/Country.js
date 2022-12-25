@@ -55,13 +55,16 @@ function Country({country, selectCountry, deleteCountry, citiz}){
     }
 
     return(
-        <div>
+        <div className='country'>
             {console.log()}
-            <div onClick={() => { selectCountry(country) }}>{country.name} - {country.population}</div>
-            {country.selected && <button onClick={() => { deleteCountry(country.id) }}>Delete</button>}
-            {country.selected && citizens.map((item) => {
-                return <Citizen citizen={item} selectCitizen={selectCitizen} deleteCitizen={deleteCitizen} />
-            })}
+            <div onClick={() => { selectCountry(country) }}>{country.name}</div>
+            {country.selected && <div>
+                <div>Population: {country.population} </div>
+                <button onClick={() => { deleteCountry(country.id) }}>Delete</button>
+                {country.selected && citizens.map((item) => {
+                    return <Citizen citizen={item} selectCitizen={selectCitizen} deleteCitizen={deleteCitizen} />
+                })}
+            </div>}
         </div>
     )
 }

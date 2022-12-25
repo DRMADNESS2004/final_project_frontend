@@ -95,6 +95,7 @@ function WorldList(){
                             setError(error.status + " error")
                         })  
                     loadCountriesFromAPI(); 
+                    console.log(citizens)
                     /*setUpdate(<div>{countries.map((item)=>{
                         return <Country country={item} selectCountry={selectCountry} deleteCountry={deleteCountry} citiz={citizens}/>
                     })}</div>)*/
@@ -264,11 +265,9 @@ function WorldList(){
     const handleClick = geo => () => {
         var countryName=document.getElementsByName("countryName")[0];
         var country=document.getElementsByName("country")[0]
-        console.log(geo);
         country.value=geo.name
         countryName.value=geo.name
         var geos=geo.name.split(' ')
-        console.log(geos)
         var geoFirst=geos[0]
         var population=document.getElementsByName("population")[0]
         possibleCountries.forEach((item)=>{
@@ -296,14 +295,12 @@ function WorldList(){
     }
 
     return(
-        <div class='container'>
-            <h1>Countries and their population</h1>
-            <h1>Add or Modify Countries</h1>
+        <div className='container'>
+            <h1>Country/Citizen Simulation</h1>
+            <h3>Add or Modify Countries</h3>
             <form onSubmit={handleSubmit(handleCountrySubmit)}>
-                <label>Name</label>
-                <input {...register("countryName", { required: true })}></input><br/>
-                <label>Population</label>
-                <input {...register("population", { required: true, max:{value:1439323776,message:'The largest population is 1,439,323,776'}, min:{valu:800, message: 'The smallest population is 800'} })}></input><br/>
+                <input placeholder='Name' {...register("countryName", { required: true })}></input><br/>
+                <input placeholder='Population' {...register("population", { required: true, max:{value:1439323776,message:'The largest population is 1,439,323,776'}, min:{valu:800, message: 'The smallest population is 800'} })}></input><br/>
                 <button type="submit">Add</button>
             </form>
             <div>{error}</div>
@@ -331,16 +328,11 @@ function WorldList(){
             </div>
             <h1>Add or Modify Citizens</h1>
             <form onSubmit={handleSubmit2(handleCitizenSubmit)}>
-                <label>Name</label>
-                <input {...register2("citizenName", { required: true})}></input><br/>
-                <label>Country</label>
-                <input {...register2("country", { required: true})}></input><br/>
-                <label>Job</label>
-                <input {...register2("job", { required: true, minLength:{value:6, message:'The minimum length is 6'}, maxLength:{value:40, message:'The maximum length is 40'}})}></input><br/>
-                <label>Salary</label>
-                <input {...register2("salary", { required: true, min:{value:0,message:'The minimum is 0'}, max:{value:5000000,message:'The maximum is 5,000,000'}})}></input><br/>
-                <label>Weekly Hours</label>
-                <input {...register2("weeklyHours", { required: true, min:{value:0,message:'The minimum is 0'}, max:{value:100,message:'The maximum is 100'}})}></input><br/>
+                <input placeholder='Name' {...register2("citizenName", { required: true})}></input><br/>
+                <input placeholder='Country' {...register2("country", { required: true})}></input><br/>
+                <input placeholder='Job' {...register2("job", { required: true, minLength:{value:6, message:'The minimum length is 6'}, maxLength:{value:40, message:'The maximum length is 40'}})}></input><br/>
+                <input placeholder='Salary' {...register2("salary", { required: true, min:{value:0,message:'The minimum is 0'}, max:{value:5000000,message:'The maximum is 5,000,000'}})}></input><br/>
+                <input placeholder='Weekly Hours' {...register2("weeklyHours", { required: true, min:{value:0,message:'The minimum is 0'}, max:{value:100,message:'The maximum is 100'}})}></input><br/>
                 <button type="submit">Add</button>
             </form>
         </div>
