@@ -164,6 +164,7 @@ function WorldList(){
             .then((response) => {
                 if (response.status === 200)
                     loadCountriesFromAPI()
+                    loadCitizensFromAPI()
             })
             .catch((error) => {
                 setError(error.status + " error")
@@ -201,14 +202,13 @@ function WorldList(){
         })
         if(!isValid){
             setError("Country name isn't valid")
-            setCountries([])
             reset()
             return;
         }
 
         var isAlreadyThere=false;
         countries.forEach((item)=>{
-            if(data.countryName==item.name){
+            if(name==item.name){
                 console.log(data.countryName)
                 console.log(item)
                 isAlreadyThere=true
@@ -229,7 +229,6 @@ function WorldList(){
 
         setError("")
         reset()
-        //populationExist=false
     }
 
     const countryInput=document.getElementsByName("country")[0]
@@ -339,7 +338,7 @@ function WorldList(){
                         required: "Population must be provided", 
                         pattern:{value:/^\d*$/, message:"The population must be a number"},
                         max:{value:1439323776,message:'The largest population is 1,439,323,776'}, 
-                        min:{valu:800, message: 'The smallest population is 800'} 
+                        min:{value:800, message: 'The smallest population is 800'} 
                     })}></input><br/>
 
                     {errors2.countryName && <p>{errors2.countryName?.message}</p>}
