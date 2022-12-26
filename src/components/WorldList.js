@@ -241,7 +241,6 @@ function WorldList(){
         const salary =data.salary
         const weeklyHours=data.weeklyHours
 
-
         var isExist=false;
         countries.forEach((item)=>{
             if(item.name==country){
@@ -256,14 +255,18 @@ function WorldList(){
         }
 
         var nameId=0;
+        var cName=""
         console.log(citizens)
         citizens.forEach((item)=>{
             if(item.name==citizenName){
                 nameId=item.id
+                cName=item.country.name
             }
         })
 
-        if(nameId!=0&&isExist){
+        console.log(nameId)
+        console.log(cName)
+        if(nameId!=0&&cName==country){
             modifyCitizen({
                 "id":nameId,
                 "name": citizenName,
@@ -289,6 +292,7 @@ function WorldList(){
 
         setError("")
         reset2()
+        nameId=0
     } 
 
     var populationExist=false;
