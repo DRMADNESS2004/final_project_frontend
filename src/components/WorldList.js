@@ -50,6 +50,7 @@ function WorldList(){
     useEffect(() => {
         loadCountriesFromAPI()
         getPossibleCountries()
+        loadCitizensFromAPI()
     }, [])
 
     const addCountry = (item) => {
@@ -69,6 +70,17 @@ function WorldList(){
     }
 
     const [citizens, setCitizens] = useState([]);
+    const loadCitizensFromAPI=()=>{
+        axios.get('http://localhost:8080/api/citizens')
+                    .then((response) => {
+                        if (response.status === 200) {
+                            setCitizens(response.data);
+                        }
+                    })
+                    .catch((error) => {
+                        setError(error.status + " error")
+                    })
+    }
 
     const addCitizen = (item) => {
         getCurrCountry(item.country)
@@ -83,25 +95,36 @@ function WorldList(){
         })
             .then((response) => {
                 if (response.status === 201) {
-                    axios.get('http://localhost:8080/api/countries/'+countryId+'/citizens')
-                        .then((response) => {
-                            if (response.status === 200) {
-                                setCitizens(response.data);
-                            }
-                        })
-                        .catch((error) => {
-                            setError(error.status + " error")
-                        })  
                     loadCountriesFromAPI(); 
+                    loadCitizensFromAPI();
                 }
             })
             .catch((error) => {
                 setError(error.status + " error")
-            })
-
-          
+            })      
     }
 
+    const modifyCitizen = (item) => {
+        axios.put('http://localhost:8080/api/citizens/'+item.id, {
+            "name": item.name,
+            "selected": false,
+            "job":{
+                "name":item.job.name,
+                "salary":item.job.salary,
+                "weeklyHours":item.job.weeklyHours
+            }
+        })
+            .then((response) => {
+                if (response.status === 200) {
+                    loadCountriesFromAPI();
+                    loadCitizensFromAPI(); 
+                }
+            })
+            .catch((error) => {
+                setError(error.status + " error")
+            })      
+    }
+    
     const modifyCountry = (item) => {
         getCurrCountry(item.name)
         console.log(item)
@@ -148,12 +171,36 @@ function WorldList(){
     }
 
     const handleCountrySubmit = (data) => {
+        setError("")
+        console.log(countries)
         console.log(data)
         const name = data.countryName
         const population = data.population
 
-        if(!populationExist){
-            setError("Country name is not valid")
+        var isValid=false;
+        var nameArray=name.split(' ')
+        var nameFirst=nameArray[0]
+        possibleCountries.forEach((item)=>{
+            var items=item.country.split(' ')
+            var itemFirst=items[0]
+            if(itemFirst==nameFirst){
+                setValue2("population",item.population)
+                if(items.length>1&&nameArray.length>1){
+                    console.log(1)
+                    if(items[1]==nameArray[1]){
+                        console.log(nameArray)
+                        console.log(item)
+                        setValue2("population",item.population)
+                        isValid=true
+                    }
+                }
+                else{
+                    isValid=true
+                }
+            }
+        })
+        if(!isValid){
+            setError("Country name isn't valid")
             setCountries([])
             reset()
             return;
@@ -163,7 +210,7 @@ function WorldList(){
         countries.forEach((item)=>{
             if(data.countryName==item.name){
                 console.log(data.countryName)
-                console.log(item.name)
+                console.log(item)
                 isAlreadyThere=true
             }
         })
@@ -182,15 +229,14 @@ function WorldList(){
 
         setError("")
         reset()
-        populationExist=false
+        //populationExist=false
     }
 
     const countryInput=document.getElementsByName("country")[0]
     const handleCitizenSubmit = (data) => {
 
-        data.country=countryInput.value
         const citizenName=data.citizenName
-        const country=countryInput.value
+        const country=data.country
         const job=data.job
         const salary =data.salary
         const weeklyHours=data.weeklyHours
@@ -209,17 +255,39 @@ function WorldList(){
             return;
         }
 
-        setError("")
-        
-        addCitizen({
-            "name": citizenName,
-            "job": {
-                "name":job,
-                "salary":salary,
-                "weeklyHours":weeklyHours
-            },
-            "country":country
+        var nameId=0;
+        console.log(citizens)
+        citizens.forEach((item)=>{
+            if(item.name==citizenName){
+                nameId=item.id
+            }
         })
+
+        if(nameId!=0&&isExist){
+            modifyCitizen({
+                "id":nameId,
+                "name": citizenName,
+                "job": {
+                    "name":job,
+                    "salary":salary,
+                    "weeklyHours":weeklyHours
+                },
+                "country":country
+            })
+        }
+        else{
+            addCitizen({
+                "name": citizenName,
+                "job": {
+                    "name":job,
+                    "salary":salary,
+                    "weeklyHours":weeklyHours
+                },
+                "country":country
+            })
+        }
+
+        setError("")
         reset2()
     } 
 
@@ -317,7 +385,7 @@ function WorldList(){
             <div className='right'>
                 <div>{error}</div>
                 <div>{countries.map((item)=>{
-                    return <Country country={item} selectCountry={selectCountry} deleteCountry={deleteCountry} citiz={citizens}/>
+                    return <Country country={item} selectCountry={selectCountry} deleteCountry={deleteCountry}/>
                 })}</div>
             </div>
 

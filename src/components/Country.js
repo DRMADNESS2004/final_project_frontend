@@ -2,8 +2,8 @@ import Citizen from './Citizen';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
-function Country({country, selectCountry, deleteCountry, citiz}){
-    const [citizens, setCitizens] = useState([citiz]);
+function Country({country, selectCountry, deleteCountry}){
+    const [citizens, setCitizens] = useState([]);
     const [error, setError] = useState("");
 
     const loadCitizensFromAPI = () => {
@@ -62,6 +62,7 @@ function Country({country, selectCountry, deleteCountry, citiz}){
                 {country.selected && citizens.map((item) => {
                     return <Citizen citizen={item} selectCitizen={selectCitizen} deleteCitizen={deleteCitizen} />
                 })}
+                <div>{error}</div>
             </div>}
         </div>
     )
