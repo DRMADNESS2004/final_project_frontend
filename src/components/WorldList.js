@@ -347,7 +347,7 @@ function WorldList(){
                     <input type="submit"></input>
                 </form>
 
-                <h3>Add Citizens</h3>
+                <h3>Add or Modify Citizens</h3>
                 <form onSubmit={handleSubmit2(handleCitizenSubmit)}>
                     <input placeholder='Name' {...register2("citizenName", { 
                         required: "Citizen name must be provided"
