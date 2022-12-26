@@ -2,37 +2,54 @@ path {
   fill: #51C6B2;
 }
 
-h1{
-
+body{
+  background: linear-gradient(75deg,#A3E1D1 50%,#0088cc 50%);
 }
 
 .container{
   margin:auto;
   text-align: center;
   font-family: Montserrat, sans-serif;
+} 
+
+h3{
+  color: #0088cc;
 }
 
 input{
+  font-size: 15px;
+  color:#0088cc;
   margin:1%;
   padding:1%;
   border-radius: 5000px;
+  border-color: #2B96A0;
+  background-color: white;
+}
+
+input:hover{
+  padding:2%;
+  transition: 0.1s;
 }
 
 button{
   margin:1%;
   padding:1%;
   border-radius: 5000px;
+  border-color: #2B96A0;
   background-color: white;
 }
 
 .country{
-  border: 2px black solid;
+  border: 2px #A3E1D1 solid;
   width:100%;
+  color: #A3E1D1;
+  font-size:15px;
+  font-weight: bold;
 }
 
-/*.container div{
-  margin: 1%;
-}*/
+.citizen{
+  border: 2px #51c6b2 solid;
+}
 
 .left{
   float:left;

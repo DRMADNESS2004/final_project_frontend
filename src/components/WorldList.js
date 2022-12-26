@@ -4,7 +4,6 @@ import Country from './Country';
 import React from 'react';
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { useForm } from "react-hook-form";
-import { ErrorMessage } from "@hookform/error-message";
 
 function WorldList(){
     const [countries, setCountries] = useState([]);
@@ -16,16 +15,15 @@ function WorldList(){
       })
 
     const getPossibleCountries=()=>{
-        fetch('http://localhost:3004/countries',{
-            header:{
-                'Content-Type':'application/json',
-                'Accept':'application/json'  
-            }
-        })
-        .then((response)=>response.clone().json())
-        .then((myJson)=>{
-            setPossibleCountries(myJson)
-        })
+        axios.get('http://localhost:8080/api/possibleCountries')
+            .then((response) => {
+                if (response.status === 200) {
+                    setPossibleCountries(response.data);
+                }
+            })
+            .catch((error) => {
+                setError(error.status + " error")
+            })
     }
 
     const loadCountriesFromAPI = () => {
@@ -40,23 +38,18 @@ function WorldList(){
             })
     }
 
-    const [currCountry,setCurrCountry]=useState(0)
     var countryId=0
     const getCurrCountry=(name)=>{
         countries.forEach((item)=>{
             if(name==item.name){
                 countryId=item.id
-                setCurrCountry(countryId)
             }
         })
     }
 
     useEffect(() => {
-        loadCountriesFromAPI();
+        loadCountriesFromAPI()
         getPossibleCountries()
-        /*setDisplay(<div>{countries.map((item)=>{
-            return <Country country={item} selectCountry={selectCountry} deleteCountry={deleteCountry} citiz={citizens}/>
-        })}</div>)*/
     }, [])
 
     const addCountry = (item) => {
@@ -100,9 +93,6 @@ function WorldList(){
                             setError(error.status + " error")
                         })  
                     loadCountriesFromAPI(); 
-                    /*setUpdate(<div>{countries.map((item)=>{
-                        return <Country country={item} selectCountry={selectCountry} deleteCountry={deleteCountry} citiz={citizens}/>
-                    })}</div>)*/
                 }
             })
             .catch((error) => {
@@ -112,11 +102,13 @@ function WorldList(){
           
     }
 
-    /*const setCountry = (id, country) => {
-        console.log(id)
-        console.log(countries)
-        axios.patch(('http://localhost:8080/api/citizens' + id), {
-            "country": country,
+    const modifyCountry = (item) => {
+        getCurrCountry(item.name)
+        console.log(item)
+        axios.put(('http://localhost:8080/api/countries/' + countryId), {
+            "name": item.name,
+            "population":item.population,
+            "selected":false
         })
             .then((response) => {
                 if (response.status === 200) {
@@ -126,7 +118,7 @@ function WorldList(){
             .catch((error) => {
                 setError(error.status + " error")
             })
-    }*/
+    }
 
     const selectCountry = (item) => {
         axios.put(('http://localhost:8080/api/countries/' + item.id), {
@@ -160,26 +152,6 @@ function WorldList(){
         const name = data.countryName
         const population = data.population
 
-        if(name==""&&population==""&&countryName.value!=""&&population.value!=""){
-            name=countryName.value
-            population=population.value
-        }
-
-        var isAlreadyThere=false;
-        countries.forEach((item)=>{
-            if(data.countryName==item.name){
-                console.log(data.countryName)
-                console.log(item.name)
-                setError("Country already exists in the list")
-                isAlreadyThere=true
-            }
-        })
-        if(isAlreadyThere){
-            setError("Country already exists in the list")
-            reset()
-            return;
-        }
-
         if(!populationExist){
             setError("Country name is not valid")
             setCountries([])
@@ -187,31 +159,34 @@ function WorldList(){
             return;
         }
 
-        /*if (population<800||population>1439323776) {
-            setError("Smallest population is 800 and largest population is 1,439,323,776")
-            setCountries([])
-            return;
-        }*/
-        setError("")
-        
-        addCountry({
-            "name": name,
-            "population": population,
+        var isAlreadyThere=false;
+        countries.forEach((item)=>{
+            if(data.countryName==item.name){
+                console.log(data.countryName)
+                console.log(item.name)
+                isAlreadyThere=true
+            }
         })
+        if(isAlreadyThere){
+            modifyCountry({
+                "name":name,
+                "population":population
+            })
+        }
+        else{
+            addCountry({
+                "name": name,
+                "population": population,
+            })
+        }
+
+        setError("")
         reset()
-        //event.target.elements.countryName.value = ""
-        //event.target.elements.population.value = ""
         populationExist=false
     }
 
     const countryInput=document.getElementsByName("country")[0]
     const handleCitizenSubmit = (data) => {
-        //event.preventDefault();
-        /*const citizenName = event.target.elements.citizenName.value
-        const country = event.target.elements.country.value
-        const job = event.target.elements.job.value
-        const salary = event.target.elements.salary.value
-        const weeklyHours = event.target.elements.weeklyHours.value*/
 
         data.country=countryInput.value
         const citizenName=data.citizenName
@@ -234,21 +209,6 @@ function WorldList(){
             return;
         }
 
-        /*if(job.length<3||job.length>40){
-            setError("Job name needs to be between 3 and 40 characters and needs to be vslid");
-            setCountries([])
-        }
-
-        if(salary<0||salary>1000000){
-            setError("Job name needs to be between 3 and 40 characters and needs to be vslid");
-            setCountries([])
-        }
-
-        if (weeklyHours <0 || weeklyHours > 100) {
-            setError("Weekly hours needs to be a valid number")
-            setCountries([])
-            return;
-        }*/
         setError("")
         
         addCitizen({
@@ -261,18 +221,8 @@ function WorldList(){
             "country":country
         })
         reset2()
-        /*event.target.elements.citizenName.value = ""
-        event.target.elements.country.value = ""
-        event.target.elements.job.value = ""
-        event.target.elements.salary.value = ""
-        event.target.elements.weeklyHours.value = ""*/
     } 
-    
-    /*const [update,setUpdate]=useState(<div>{countries.map((item)=>{
-        return <Country country={item} selectCountry={selectCountry} deleteCountry={deleteCountry} citiz={citizens}/>
-    })}</div>)*/
-    const countryName=document.getElementsByName("countryName")[0]
-    const population=document.getElementsByName("population")[0]
+
     var populationExist=false;
     const handleClick = geo => () => {
         setValue2("countryName",geo.name)
@@ -298,7 +248,7 @@ function WorldList(){
             }
         })
         if(!populationExist){
-            population.value=""
+            setValue("population","")
         }
         setValue("country",geo.name)
     }
@@ -315,6 +265,7 @@ function WorldList(){
 
                     <input placeholder='Population' {...register("population", { 
                         required: "Population must be provided", 
+                        pattern:{value:/^\d*$/, message:"The population must be a number"},
                         max:{value:1439323776,message:'The largest population is 1,439,323,776'}, 
                         min:{valu:800, message: 'The smallest population is 800'} 
                     })}></input><br/>
@@ -324,7 +275,7 @@ function WorldList(){
                     <input type="submit"></input>
                 </form>
 
-                <h3>Add or Modify Citizens</h3>
+                <h3>Add Citizens</h3>
                 <form onSubmit={handleSubmit2(handleCitizenSubmit)}>
                     <input placeholder='Name' {...register2("citizenName", { 
                         required: "Citizen name must be provided"
@@ -342,12 +293,14 @@ function WorldList(){
 
                     <input placeholder='Salary' {...register2("salary", { 
                         required: "Salary must be provided", 
+                        pattern:{value:/^\d*$/, message:"The salary must be a number"},
                         min:{value:0,message:'The minimum is 0'}, 
                         max:{value:5000000,message:'The maximum is 5,000,000'
                     }})}></input><br/>
 
                     <input placeholder='Weekly Hours' {...register2("weeklyHours", { 
                         required: "Weekly Hours must be provided", 
+                        pattern:{value:/^\d*$/, message:"The weekly hours must be a number"},
                         min:{value:0,message:'The minimum is 0'}, 
                         max:{value:100,message:'The maximum is 100'
                     }})}></input><br/>
