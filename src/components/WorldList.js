@@ -4,13 +4,16 @@ import Country from './Country';
 import React from 'react';
 import { ComposableMap, Geographies, Geography } from "react-simple-maps";
 import { useForm } from "react-hook-form";
+import { ErrorMessage } from "@hookform/error-message";
 
 function WorldList(){
     const [countries, setCountries] = useState([]);
     const [error, setError] = useState("");
     const [possibleCountries,setPossibleCountries]=useState([])
-    const {register,handleSubmit,reset}=useForm()
-    const {register:register2,handleSubmit:handleSubmit2}=useForm()
+    const {register,handleSubmit,reset,formState:{errors:errors2},setValue:setValue2}=useForm()
+    const {register:register2,handleSubmit:handleSubmit2,reset:reset2,setValue,formState: { errors }}=useForm({
+        criteriaMode: "all"
+      })
 
     const getPossibleCountries=()=>{
         fetch('http://localhost:3004/countries',{
@@ -51,6 +54,9 @@ function WorldList(){
     useEffect(() => {
         loadCountriesFromAPI();
         getPossibleCountries()
+        /*setDisplay(<div>{countries.map((item)=>{
+            return <Country country={item} selectCountry={selectCountry} deleteCountry={deleteCountry} citiz={citizens}/>
+        })}</div>)*/
     }, [])
 
     const addCountry = (item) => {
@@ -73,7 +79,6 @@ function WorldList(){
 
     const addCitizen = (item) => {
         getCurrCountry(item.country)
-        console.log(item)
         axios.post('http://localhost:8080/api/countries/'+countryId+'/citizens', {
             "name": item.name,
             "selected": false,
@@ -95,7 +100,6 @@ function WorldList(){
                             setError(error.status + " error")
                         })  
                     loadCountriesFromAPI(); 
-                    console.log(citizens)
                     /*setUpdate(<div>{countries.map((item)=>{
                         return <Country country={item} selectCountry={selectCountry} deleteCountry={deleteCountry} citiz={citizens}/>
                     })}</div>)*/
@@ -156,6 +160,11 @@ function WorldList(){
         const name = data.countryName
         const population = data.population
 
+        if(name==""&&population==""&&countryName.value!=""&&population.value!=""){
+            name=countryName.value
+            population=population.value
+        }
+
         var isAlreadyThere=false;
         countries.forEach((item)=>{
             if(data.countryName==item.name){
@@ -195,6 +204,7 @@ function WorldList(){
         populationExist=false
     }
 
+    const countryInput=document.getElementsByName("country")[0]
     const handleCitizenSubmit = (data) => {
         //event.preventDefault();
         /*const citizenName = event.target.elements.citizenName.value
@@ -203,8 +213,9 @@ function WorldList(){
         const salary = event.target.elements.salary.value
         const weeklyHours = event.target.elements.weeklyHours.value*/
 
+        data.country=countryInput.value
         const citizenName=data.citizenName
-        const country=data.country
+        const country=countryInput.value
         const job=data.job
         const salary =data.salary
         const weeklyHours=data.weeklyHours
@@ -249,7 +260,7 @@ function WorldList(){
             },
             "country":country
         })
-        reset()
+        reset2()
         /*event.target.elements.citizenName.value = ""
         event.target.elements.country.value = ""
         event.target.elements.job.value = ""
@@ -260,27 +271,24 @@ function WorldList(){
     /*const [update,setUpdate]=useState(<div>{countries.map((item)=>{
         return <Country country={item} selectCountry={selectCountry} deleteCountry={deleteCountry} citiz={citizens}/>
     })}</div>)*/
-    
+    const countryName=document.getElementsByName("countryName")[0]
+    const population=document.getElementsByName("population")[0]
     var populationExist=false;
     const handleClick = geo => () => {
-        var countryName=document.getElementsByName("countryName")[0];
-        var country=document.getElementsByName("country")[0]
-        country.value=geo.name
-        countryName.value=geo.name
+        setValue2("countryName",geo.name)
         var geos=geo.name.split(' ')
         var geoFirst=geos[0]
-        var population=document.getElementsByName("population")[0]
         possibleCountries.forEach((item)=>{
             var items=item.country.split(' ')
             var itemFirst=items[0]
             if(itemFirst==geoFirst){
-                population.value=item.population
+                setValue2("population",item.population)
                 if(items.length>1&&geos.length>1){
                     console.log(1)
                     if(items[1]==geos[1]){
                         console.log(geo)
                         console.log(item)
-                        population.value=item.population
+                        setValue2("population",item.population)
                         populationExist=true
                     }
                 }
@@ -292,21 +300,74 @@ function WorldList(){
         if(!populationExist){
             population.value=""
         }
+        setValue("country",geo.name)
     }
 
     return(
         <div className='container'>
             <h1>Country/Citizen Simulation</h1>
-            <h3>Add or Modify Countries</h3>
-            <form onSubmit={handleSubmit(handleCountrySubmit)}>
-                <input placeholder='Name' {...register("countryName", { required: true })}></input><br/>
-                <input placeholder='Population' {...register("population", { required: true, max:{value:1439323776,message:'The largest population is 1,439,323,776'}, min:{valu:800, message: 'The smallest population is 800'} })}></input><br/>
-                <button type="submit">Add</button>
-            </form>
-            <div>{error}</div>
-            <div>{countries.map((item)=>{
-                return <Country country={item} selectCountry={selectCountry} deleteCountry={deleteCountry} citiz={citizens}/>
-            })}</div>
+            <div className='left'>
+                <h3>Add or Modify Countries</h3>
+                <form onSubmit={handleSubmit(handleCountrySubmit)}>
+                    <input placeholder='Name' {...register("countryName", { 
+                        required: "Country name must be provided" 
+                    })}></input><br/>
+
+                    <input placeholder='Population' {...register("population", { 
+                        required: "Population must be provided", 
+                        max:{value:1439323776,message:'The largest population is 1,439,323,776'}, 
+                        min:{valu:800, message: 'The smallest population is 800'} 
+                    })}></input><br/>
+
+                    {errors2.countryName && <p>{errors2.countryName?.message}</p>}
+                    {errors2.population && <p>{errors2.population?.message}</p>}
+                    <input type="submit"></input>
+                </form>
+
+                <h3>Add or Modify Citizens</h3>
+                <form onSubmit={handleSubmit2(handleCitizenSubmit)}>
+                    <input placeholder='Name' {...register2("citizenName", { 
+                        required: "Citizen name must be provided"
+                    })}></input><br/>
+
+                    <input placeholder='Country' {...register2("country", { 
+                        required: "Country name must be provided"
+                    })}></input><br/>
+
+                    <input placeholder='Job' {...register2("job", { 
+                        required: "Job name must be provided", 
+                        minLength:{value:6, message:'The minimum length is 6'}, 
+                        maxLength:{value:40, message:'The maximum length is 40'
+                    }})}></input><br/>
+
+                    <input placeholder='Salary' {...register2("salary", { 
+                        required: "Salary must be provided", 
+                        min:{value:0,message:'The minimum is 0'}, 
+                        max:{value:5000000,message:'The maximum is 5,000,000'
+                    }})}></input><br/>
+
+                    <input placeholder='Weekly Hours' {...register2("weeklyHours", { 
+                        required: "Weekly Hours must be provided", 
+                        min:{value:0,message:'The minimum is 0'}, 
+                        max:{value:100,message:'The maximum is 100'
+                    }})}></input><br/>
+
+                    {errors.citizenName && <p>{errors.citizenName?.message}</p>}
+                    {errors.country && <p>{errors.country?.message}</p>}
+                    {errors.job && <p>{errors.job?.message}</p>}
+                    {errors.salary && <p>{errors.salary?.message}</p>}
+                    {errors.weeklyHours && <p>{errors.weeklyHours?.message}</p>}
+                    <input type="submit"></input>
+                </form>
+            </div>
+
+            <div className='right'>
+                <div>{error}</div>
+                <div>{countries.map((item)=>{
+                    return <Country country={item} selectCountry={selectCountry} deleteCountry={deleteCountry} citiz={citizens}/>
+                })}</div>
+            </div>
+
             <div>
                 <ComposableMap width={1000}>
                     <Geographies geography={"https://raw.githubusercontent.com/deldersveld/topojson/master/world-countries.json"}>
@@ -326,15 +387,6 @@ function WorldList(){
                     </Geographies>
                 </ComposableMap>
             </div>
-            <h1>Add or Modify Citizens</h1>
-            <form onSubmit={handleSubmit2(handleCitizenSubmit)}>
-                <input placeholder='Name' {...register2("citizenName", { required: true})}></input><br/>
-                <input placeholder='Country' {...register2("country", { required: true})}></input><br/>
-                <input placeholder='Job' {...register2("job", { required: true, minLength:{value:6, message:'The minimum length is 6'}, maxLength:{value:40, message:'The maximum length is 40'}})}></input><br/>
-                <input placeholder='Salary' {...register2("salary", { required: true, min:{value:0,message:'The minimum is 0'}, max:{value:5000000,message:'The maximum is 5,000,000'}})}></input><br/>
-                <input placeholder='Weekly Hours' {...register2("weeklyHours", { required: true, min:{value:0,message:'The minimum is 0'}, max:{value:100,message:'The maximum is 100'}})}></input><br/>
-                <button type="submit">Add</button>
-            </form>
         </div>
     )
 }

@@ -20,10 +20,9 @@ function Country({country, selectCountry, deleteCountry, citiz}){
 
     useEffect(() => {
         loadCitizensFromAPI();
-    }, [])
+    }, [citizens])
 
     const selectCitizen = (item) => {
-        console.log(item)
         axios.put(('http://localhost:8080/api/citizens/'+item.id), {
             "name": item.name,
             "selected": !item.selected,
@@ -56,7 +55,6 @@ function Country({country, selectCountry, deleteCountry, citiz}){
 
     return(
         <div className='country'>
-            {console.log()}
             <div onClick={() => { selectCountry(country) }}>{country.name}</div>
             {country.selected && <div>
                 <div>Population: {country.population} </div>
