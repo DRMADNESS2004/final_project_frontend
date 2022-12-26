@@ -13,16 +13,16 @@ body{
 } 
 
 h1{
-  color:#e0ece7;
+  color:#ececec;
 }
 
 h3{
-  color: #0088cc;
+  color: #03256C;
 }
 
 input{
   font-size: 15px;
-  color:#0088cc;
+  color:#03256C;
   margin:1%;
   padding:1%;
   border-radius: 5000px;
