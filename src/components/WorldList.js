@@ -231,7 +231,6 @@ function WorldList(){
         reset()
     }
 
-    const countryInput=document.getElementsByName("country")[0]
     const handleCitizenSubmit = (data) => {
 
         const citizenName=data.citizenName
@@ -248,24 +247,18 @@ function WorldList(){
         })
         if(!isExist){
             setError("Country hasn't been added");
-            setCountries([])
             reset()
             return;
         }
 
         var nameId=0;
-        var cName=""
-        console.log(citizens)
         citizens.forEach((item)=>{
-            if(item.name==citizenName){
+            if(item.name==citizenName&&country==item.country.name){
                 nameId=item.id
-                cName=item.country.name
             }
         })
 
-        console.log(nameId)
-        console.log(cName)
-        if(nameId!=0&&cName==country){
+        if(nameId!=0){ 
             modifyCitizen({
                 "id":nameId,
                 "name": citizenName,
@@ -349,7 +342,8 @@ function WorldList(){
                 <h3>Add or Modify Citizens</h3>
                 <form onSubmit={handleSubmit2(handleCitizenSubmit)}>
                     <input placeholder='Name' {...register2("citizenName", { 
-                        required: "Citizen name must be provided"
+                        required: "Citizen name must be provided",
+                        pattern:{value:/^([a-zA-Z]+\s*)+$/,message:'The name must be valid'}
                     })}></input><br/>
 
                     <input placeholder='Country' {...register2("country", { 
@@ -358,6 +352,7 @@ function WorldList(){
 
                     <input placeholder='Job' {...register2("job", { 
                         required: "Job name must be provided", 
+                        pattern:{value:/^([a-zA-Z]+\s*)+$/,message:'The job must be valid'},
                         minLength:{value:6, message:'The minimum length is 6'}, 
                         maxLength:{value:40, message:'The maximum length is 40'
                     }})}></input><br/>
